@@ -155,7 +155,7 @@ JAZZMIN_SETTINGS = {
     "site_header": "EFCC Case App",
     "site_brand": "EFCC Case App",
     "welcome_sign": "Welcome to EFCC Case App",
-    "copyright": "ZingaraLabs Ltd",
+    "copyright": "Murad Demelash",
      "show_sidebar": True,
       "show_ui_builder": True,
 }
