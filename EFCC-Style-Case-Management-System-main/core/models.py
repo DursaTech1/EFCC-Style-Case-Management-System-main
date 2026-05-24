@@ -122,7 +122,7 @@ class Suspect(models.Model):
 
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='suspects')
     full_name = models.CharField(max_length=255)
-    alias = models.CharField(max_length=255, blank=True)
+    alias = models.CharField(max_length=255, blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
     nationality = models.CharField(max_length=100, blank=True)
