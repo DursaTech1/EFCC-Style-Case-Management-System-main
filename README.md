@@ -185,8 +185,17 @@ When registering, users can select one of the following roles:
 ---
 
 ## Screenshots
+<img width="1914" height="1079" alt="image" src="https://github.com/user-attachments/assets/5350bf5f-4830-4a38-8891-79c3c9c113c1" />
+
+<img width="1916" height="1076" alt="image" src="https://github.com/user-attachments/assets/df9c5eb5-0a53-4871-8227-ce7d3d61136b" />
+
+
+
+
+
 
 > 
+
 ---
 
 ## License
