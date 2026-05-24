@@ -217,6 +217,9 @@ When registering, users can select one of the following roles:
 
 <img width="1901" height="1079" alt="image" src="https://github.com/user-attachments/assets/ec2860f2-72ba-4a3b-935a-ba448a49befe" />
 
+<img width="1891" height="1012" alt="image" src="https://github.com/user-attachments/assets/25104477-25f0-4c09-b84c-5da2755d1b29" />
+
+
 > 
 
 ---
