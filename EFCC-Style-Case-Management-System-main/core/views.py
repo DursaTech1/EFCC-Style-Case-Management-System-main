@@ -5,16 +5,12 @@ from .models import Case, User, CaseStatusLog
 from .forms import CaseForm, EvidenceForm, UserRegisterForm, CustomLoginForm
 from .utils import log_activity, role_redirect
 from core.decorators import admin_or_assigned_required
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.urls import reverse
 from django.contrib import messages
 
-
-# Create your views here.
 
 @login_required
 def case_list(request):
@@ -24,10 +20,12 @@ def case_list(request):
         cases = Case.objects.filter(assigned_to=request.user)
     return render(request, 'case_list.html', {'cases': cases})
 
+
 @login_required
 def case_detail(request, pk):
     case = get_object_or_404(Case, pk=pk)
     return render(request, 'case_detail.html', {'case': case})
+
 
 @login_required
 def case_create(request):
@@ -42,7 +40,6 @@ def case_create(request):
     else:
         form = CaseForm()
     return render(request, 'case_form.html', {'form': form})
-
 
 
 @login_required
@@ -62,48 +59,39 @@ def add_evidence(request, case_id):
     return render(request, 'evidence_form.html', {'form': form, 'case': case})
 
 
-
-
 @login_required
 @admin_or_assigned_required
 def case_update(request, pk):
     case = get_object_or_404(Case, pk=pk)
 
-    # 🔐 Permission: only admin or assigned user
-    # if not (request.user.role == 'admin' or case.assigned_to == request.user):
-    #     return HttpResponseForbidden("You do not have permission to edit this case.")
-
     if request.method == 'POST':
         form = CaseForm(request.POST, instance=case)
         if form.is_valid():
             prev_status = case.status
-            case = form.save(commit=False)
+            updated_case = form.save(commit=False)
 
-            # ✅ Track status change
-            if case.status != prev_status:
+            if updated_case.status != prev_status:
                 CaseStatusLog.objects.create(
-                    case=case,
+                    case=updated_case,
                     previous_status=prev_status,
-                    new_status=case.status,
+                    new_status=updated_case.status,
                     changed_by=request.user,
-                    note=f"Status changed from {prev_status} to {case.status}"
+                    note=f"Status changed from {prev_status} to {updated_case.status}"
                 )
-                log_activity(request.user, case, 'change_status', f"Changed status from {prev_status} to {case.status}")
+                log_activity(request.user, updated_case, 'change_status',
+                             f"Changed status from {prev_status} to {updated_case.status}")
 
-            # ✅ Log general case update
-            log_activity(request.user, case, 'update_case', "Updated case information")
-
-            case.save()
-            return redirect('case_detail', pk=case.pk)
+            log_activity(request.user, updated_case, 'update_case', "Updated case information")
+            updated_case.save()
+            return redirect('case_detail', pk=updated_case.pk)
     else:
         form = CaseForm(instance=case)
 
     return render(request, 'case_form.html', {
         'form': form,
         'case': case,
-        'is_update': True
+        'is_update': True,
     })
-
 
 
 @login_required
@@ -125,7 +113,6 @@ def dashboard(request):
     })
 
 
-
 @login_required
 @user_passes_test(lambda u: u.role == 'admin')
 def assign_case(request, pk):
@@ -134,12 +121,11 @@ def assign_case(request, pk):
         form = CaseForm(request.POST, instance=case)
         if form.is_valid():
             case = form.save()
-            log_activity(request.user, case, 'assigned_case', f"Assigned case to {case.assigned_to}")
+            log_activity(request.user, case, 'update_case', f"Assigned case to {case.assigned_to}")
             return redirect('case_detail', pk=case.pk)
     else:
         form = CaseForm(instance=case)
-    return render(request, 'case_assign.html', {'form': form, 'case': case})
-
+    return render(request, 'case_form.html', {'form': form, 'case': case, 'is_update': True})
 
 
 # Auth views
@@ -150,10 +136,11 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('dashboard')  # Adjust this
+            return redirect('dashboard')
     else:
         form = UserRegisterForm()
     return render(request, 'register.html', {'form': form})
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -165,20 +152,10 @@ def login_view(request):
         form = CustomLoginForm()
     return render(request, 'login.html', {'form': form})
 
+
 def logout_view(request):
     logout(request)
     return redirect('login')
-
-
-
-class CustomLoginView(DjangoLoginView):
-    template_name = 'login.html'
-    redirect_authenticated_user = True
-
-    def get_success_url(self):
-        return reverse(role_redirect(self.request.user))
-
-
 
 
 class CustomLoginView(DjangoLoginView):
@@ -191,7 +168,3 @@ class CustomLoginView(DjangoLoginView):
 
     def get_success_url(self):
         return reverse(role_redirect(self.request.user))
-
-
-
-

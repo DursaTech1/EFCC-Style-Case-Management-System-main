@@ -12,9 +12,8 @@
                 <span class="badge bg-info text-dark">{{ case.get_status_display }}</span>
             </p>
             <p><strong>Description:</strong><br>{{ case.description }}</p>
-            <p><strong>Assigned to:</strong> {{ case.assigned_to|get_full_name|default:"Unassigned" }}</p>
-            <p><strong>Created by:</strong> {{ case.created_by }} on {{ {{ case.created_at|naturaltime }}
-            }}</p>
+            <p><strong>Assigned to:</strong> {{ case.assigned_to.get_full_name|default:case.assigned_to.username|default:"Unassigned" }}</p>
+            <p><strong>Created by:</strong> {{ case.created_by }} on {{ case.created_at|naturaltime }}</p>
         </div>
         <div class="card-footer d-flex justify-content-between">
             {% if user.role == 'admin' or case.assigned_to == user %}

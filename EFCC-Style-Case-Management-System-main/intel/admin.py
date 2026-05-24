@@ -2,13 +2,11 @@ from django.contrib import admin
 from .models import IntelligenceSource, IntelReport
 from taggit.models import Tag
 from django.db.models import Count
-from django.contrib.admin import RelatedFieldListFilter
-from core.models import Case
 from django.urls import path
 from django.template.response import TemplateResponse
 from django.http import HttpResponse
 
-# Custom filter for source type
+
 class SourceTypeFilter(admin.SimpleListFilter):
     title = 'Source Type'
     parameter_name = 'source_type'
@@ -22,7 +20,6 @@ class SourceTypeFilter(admin.SimpleListFilter):
         return queryset
 
 
-# Custom filter for reliability score
 class ReliabilityFilter(admin.SimpleListFilter):
     title = 'Reliability Score'
     parameter_name = 'reliability_score'
@@ -42,13 +39,11 @@ class ReliabilityFilter(admin.SimpleListFilter):
         return queryset
 
 
-# Custom filter for IntelReport tags
 class IntelReportTagFilter(admin.SimpleListFilter):
     title = 'Tags'
     parameter_name = 'tags'
 
     def lookups(self, request, model_admin):
-        # Get all available tags in the database
         return [(tag.name, tag.name) for tag in Tag.objects.all()]
 
     def queryset(self, request, queryset):
@@ -57,33 +52,63 @@ class IntelReportTagFilter(admin.SimpleListFilter):
         return queryset
 
 
-
+@admin.register(IntelReport)
 class IntelReportAdmin(admin.ModelAdmin):
-    list_display = ('title', 'created_by', 'created_at', 'get_case_status', 'source')  # Add custom method for status
+    change_form_template = "intel/admin/intel/intelreport/change_form.html"
+    list_display = ('title', 'report_type', 'status', 'created_by', 'created_at', 'get_case_status', 'source')
     search_fields = ('title', 'content', 'source__name')
     list_filter = (
-        'created_at', 
-        'source__source_type', 
-        ('case__status', admin.AllValuesFieldListFilter),  # Filter by the related Case's status field
-    ) 
+        'report_type',
+        'status',
+        'created_at',
+        'source__source_type',
+        ('case__status', admin.AllValuesFieldListFilter),
+        IntelReportTagFilter,
+    )
     date_hierarchy = 'created_at'
     ordering = ('-created_at',)
 
-    # Custom method to get the related Case's status
     def get_case_status(self, obj):
         return obj.case.status if obj.case else 'N/A'
-    get_case_status.admin_order_field = 'case__status'  # Allow sorting by case status
-    get_case_status.short_description = 'Case Status'  # Display name in the admin panel
+    get_case_status.admin_order_field = 'case__status'
+    get_case_status.short_description = 'Case Status'
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<int:report_id>/download-summary/',
+                self.admin_site.admin_view(self.download_summary),
+                name='intelreport_download',
+            ),
+        ]
+        return custom_urls + urls
+
+    def download_summary(self, request, report_id):
+        report = IntelReport.objects.get(pk=report_id)
+        try:
+            from weasyprint import HTML
+            html = TemplateResponse(
+                request,
+                "intel/admin/intel/intelreport/summary_pdf.html",
+                {'report': report},
+            )
+            html.render()
+            pdf = HTML(string=html.rendered_content).write_pdf()
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="report_{report.id}.pdf"'
+            return response
+        except (ImportError, OSError):
+            return HttpResponse(
+                "PDF generation requires GTK/Pango libraries not available on this system.",
+                status=503,
+                content_type='text/plain',
+            )
 
 
-
+@admin.register(IntelligenceSource)
 class IntelligenceSourceAdmin(admin.ModelAdmin):
     list_display = ('name', 'source_type', 'reliability_score', 'created_at', 'added_by')
     search_fields = ('name', 'contact_info', 'notes')
     list_filter = ('source_type', ReliabilityFilter, 'created_at', 'added_by', 'tags')
     ordering = ('-created_at',)
-
-
-# Register models in admin panel
-admin.site.register(IntelReport, IntelReportAdmin)
-admin.site.register(IntelligenceSource, IntelligenceSourceAdmin)

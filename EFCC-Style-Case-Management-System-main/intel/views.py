@@ -63,17 +63,17 @@ def report_list(request):
     report_type = request.GET.get('report_type')
     min_reliability = request.GET.get('min_reliability')
 
-    reports = IntelReport.objects.all()
+    reports = IntelReport.objects.select_related('source', 'created_by').all()
 
     if query:
-        reports = reports.filter(Q(title__icontains=query) | Q(summary__icontains=query))
+        reports = reports.filter(Q(title__icontains=query) | Q(content__icontains=query))
 
     if report_type:
         reports = reports.filter(report_type=report_type)
 
     if min_reliability:
         try:
-            reports = reports.filter(reliability_score__gte=int(min_reliability))
+            reports = reports.filter(source__reliability_score__gte=int(min_reliability))
         except ValueError:
             pass
 
@@ -107,7 +107,9 @@ def dashboard(request):
     report_stats = IntelReport.objects.values('report_type').annotate(total=Count('id'))
     source_stats = IntelligenceSource.objects.values('source_type').annotate(total=Count('id'))
     avg_reliability = IntelligenceSource.objects.aggregate(avg_score=Avg('reliability_score'))
-    location_data = IntelReport.objects.exclude(latitude__isnull=True, longitude__isnull=True).values('title', 'latitude', 'longitude')
+    location_data = IntelReport.objects.exclude(
+        latitude__isnull=True
+    ).exclude(longitude__isnull=True).values('title', 'latitude', 'longitude')
 
     return render(request, 'intel/dashboard.html', {
         'report_stats': list(report_stats),

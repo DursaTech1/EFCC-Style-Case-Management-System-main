@@ -29,10 +29,25 @@ class IntelligenceSource(models.Model):
 
 
 class IntelReport(models.Model):
+    REPORT_TYPE_CHOICES = [
+        ('Incident', 'Incident'),
+        ('Threat', 'Threat'),
+        ('Surveillance', 'Surveillance'),
+        ('Other', 'Other'),
+    ]
+
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('active', 'Active'),
+        ('archived', 'Archived'),
+    ]
+
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name='intel_reports')
     title = models.CharField(max_length=255)
     content = models.TextField()
-    source = models.ForeignKey(IntelligenceSource, on_delete=models.SET_NULL, null=True)
+    report_type = models.CharField(max_length=20, choices=REPORT_TYPE_CHOICES, default='Incident')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    source = models.ForeignKey(IntelligenceSource, on_delete=models.SET_NULL, null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     tags = TaggableManager()
