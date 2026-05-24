@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Add Deadline — EFCC CMS{% endblock %}
+{% block page_title %}Add Deadline{% endblock %}
+{% block nav_cases %}active{% endblock %}
+
+{% block content %}
+<div class="card p-4" style="max-width:500px;">
+    <h5 class="mb-3">
+        <i class="bi bi-calendar-plus me-2"></i>Add Deadline to "{{ case.title }}"
+    </h5>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Title *</label>
+            {{ form.title }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Type</label>
+            {{ form.deadline_type }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Due Date & Time *</label>
+            {{ form.due_date }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Notes</label>
+            {{ form.notes }}
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-warning">
+                <i class="bi bi-save me-1"></i>Save Deadline
+            </button>
+            <a href="{% url 'case_detail' case.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,43 +1,47 @@
 {% extends 'base.html' %}
 {% load form_filters %}
+{% block title %}{% if is_update %}Edit Case{% else %}New Case{% endif %} — EFCC CMS{% endblock %}
+{% block page_title %}{% if is_update %}Edit Case{% else %}New Case{% endif %}{% endblock %}
+{% block nav_cases %}active{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card shadow-sm rounded-3">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">{% if is_update %}Update Case{% else %}New Case{% endif %}</h5>
+<div class="card p-4" style="max-width:600px;">
+    <h5 class="mb-3">
+        <i class="bi bi-folder-plus me-2"></i>
+        {% if is_update %}Update Case{% else %}Create New Case{% endif %}
+    </h5>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Title *</label>
+            {{ form.title|add_class:"form-control" }}
         </div>
-        <div class="card-body">
-            <form method="post" novalidate>
-                {% csrf_token %}
-
-                <div class="mb-3">
-                    <label for="id_title" class="form-label">Title</label>
-                    {{ form.title|add_class:"form-control" }}
-                </div>
-
-                <div class="mb-3">
-                    <label for="id_description" class="form-label">Description</label>
-                    {{ form.description|add_class:"form-control" }}
-                </div>
-
-                <div class="mb-3">
-                    <label for="id_status" class="form-label">Status</label>
-                    {{ form.status|add_class:"form-select" }}
-                </div>
-
-                {% if request.user.role == 'admin' %}
-                <div class="mb-3">
-                    <label for="id_assigned_to" class="form-label">Assign to</label>
-                    {{ form.assigned_to|add_class:"form-select" }}
-                </div>
-                {% endif %}
-
-                <button type="submit" class="btn btn-success w-100">
-                    {% if is_update %}Update{% else %}Submit{% endif %}
-                </button>
-            </form>
+        <div class="mb-3">
+            <label class="form-label">Description *</label>
+            {{ form.description|add_class:"form-control" }}
         </div>
-    </div>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                {{ form.status|add_class:"form-select" }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Priority</label>
+                {{ form.priority|add_class:"form-select" }}
+            </div>
+        </div>
+        {% if request.user.role == 'admin' %}
+        <div class="mb-3">
+            <label class="form-label">Assign To</label>
+            {{ form.assigned_to|add_class:"form-select" }}
+        </div>
+        {% endif %}
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save me-1"></i>{% if is_update %}Update{% else %}Create Case{% endif %}
+            </button>
+            <a href="{% url 'case_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
 </div>
 {% endblock %}

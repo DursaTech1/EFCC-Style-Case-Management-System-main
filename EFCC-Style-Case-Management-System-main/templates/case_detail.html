@@ -1,78 +1,238 @@
 {% extends 'base.html' %}
 {% load humanize %}
+{% block title %}{{ case.title }} — EFCC CMS{% endblock %}
+{% block page_title %}Case Detail{% endblock %}
+{% block nav_cases %}active{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card shadow rounded-3 mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">{{ case.title }}</h5>
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h5 class="mb-1">{{ case.title }}</h5>
+        <span class="badge bg-{% if case.status == 'open' %}warning text-dark{% elif case.status == 'investigating' %}info text-dark{% else %}success{% endif %} me-1">
+            {{ case.get_status_display }}
+        </span>
+        <span class="badge bg-{% if case.priority == 'critical' %}danger{% elif case.priority == 'high' %}warning text-dark{% elif case.priority == 'medium' %}primary{% else %}secondary{% endif %}">
+            {{ case.get_priority_display }}
+        </span>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        {% if request.user.role == 'admin' or case.assigned_to == request.user %}
+        <a href="{% url 'case_update' case.pk %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+        {% endif %}
+        <a href="{% url 'export_case_detail_csv' case.pk %}" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-download me-1"></i>Export CSV
+        </a>
+        <a href="{% url 'case_list' %}" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Left column -->
+    <div class="col-lg-8">
+
+        <!-- Case info -->
+        <div class="card p-3 mb-3">
+            <h6 class="text-muted mb-2">Case Information</h6>
+            <p class="mb-1"><strong>Description:</strong></p>
+            <p>{{ case.description }}</p>
+            <div class="row text-muted small">
+                <div class="col-sm-6">
+                    <strong>Assigned to:</strong>
+                    {{ case.assigned_to.get_full_name|default:case.assigned_to.username|default:"Unassigned" }}
+                </div>
+                <div class="col-sm-6">
+                    <strong>Created by:</strong> {{ case.created_by }} on {{ case.created_at|naturaltime }}
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <p><strong>Status:</strong> 
-                <span class="badge bg-info text-dark">{{ case.get_status_display }}</span>
-            </p>
-            <p><strong>Description:</strong><br>{{ case.description }}</p>
-            <p><strong>Assigned to:</strong> {{ case.assigned_to.get_full_name|default:case.assigned_to.username|default:"Unassigned" }}</p>
-            <p><strong>Created by:</strong> {{ case.created_by }} on {{ case.created_at|naturaltime }}</p>
-        </div>
-        <div class="card-footer d-flex justify-content-between">
-            {% if user.role == 'admin' or case.assigned_to == user %}
-                <a href="{% url 'case_update' case.pk %}" class="btn btn-sm btn-secondary">Edit Case</a>
+
+        <!-- Suspects -->
+        <div class="card p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0"><i class="bi bi-person-exclamation me-1"></i>Suspects / Persons of Interest</h6>
+                <a href="{% url 'add_suspect' case.id %}" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-plus-lg me-1"></i>Add Suspect
+                </a>
+            </div>
+            {% if case.suspects.all %}
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead class="table-light">
+                        <tr><th>Name</th><th>Alias</th><th>Nationality</th><th>Phone</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for s in case.suspects.all %}
+                        <tr>
+                            <td>
+                                {% if s.photo %}<img src="{{ s.photo.url }}" width="28" height="28" class="rounded-circle me-1" alt="">{% endif %}
+                                {{ s.full_name }}
+                            </td>
+                            <td>{{ s.alias|default:"—" }}</td>
+                            <td>{{ s.nationality|default:"—" }}</td>
+                            <td>{{ s.phone|default:"—" }}</td>
+                            <td>
+                                <a href="{% url 'edit_suspect' s.id %}" class="btn btn-xs btn-outline-secondary btn-sm py-0 px-1">Edit</a>
+                                <a href="{% url 'delete_suspect' s.id %}" class="btn btn-xs btn-outline-danger btn-sm py-0 px-1"
+                                   onclick="return confirm('Remove this suspect?')">Del</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted small mb-0">No suspects added yet.</p>
             {% endif %}
-            <a href="{% url 'case_list' %}" class="btn btn-sm btn-outline-light">Back to Cases</a>
         </div>
+
+        <!-- Evidence -->
+        <div class="card p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0"><i class="bi bi-paperclip me-1"></i>Evidence</h6>
+                <a href="{% url 'add_evidence' case.id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-upload me-1"></i>Upload
+                </a>
+            </div>
+            {% if case.evidence.all %}
+            <ul class="list-group list-group-flush">
+                {% for item in case.evidence.all %}
+                <li class="list-group-item px-0">
+                    <a href="{{ item.file.url }}" target="_blank">
+                        <i class="bi bi-file-earmark me-1"></i>{{ item.filename }}
+                    </a>
+                    {% if item.description %} — {{ item.description }}{% endif %}
+                    <br>
+                    <small class="text-muted">Uploaded by {{ item.uploaded_by }} · {{ item.uploaded_at|naturaltime }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted small mb-0">No evidence uploaded yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Comments -->
+        <div class="card p-3 mb-3">
+            <h6 class="mb-3"><i class="bi bi-chat-left-text me-1"></i>Comments</h6>
+            {% for comment in case.comments.all %}
+            <div class="d-flex gap-2 mb-3">
+                <div class="flex-shrink-0">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:36px;height:36px;font-size:.85rem;">
+                        {{ comment.author.username|first|upper }}
+                    </div>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between">
+                        <strong class="small">{{ comment.author.username }}</strong>
+                        <span class="text-muted small">{{ comment.created_at|naturaltime }}</span>
+                    </div>
+                    <p class="mb-1 small">{{ comment.body }}</p>
+                    {% if request.user == comment.author or request.user.role == 'admin' %}
+                    <a href="{% url 'delete_comment' comment.id %}"
+                       class="text-danger small" onclick="return confirm('Delete this comment?')">
+                        <i class="bi bi-trash"></i> Delete
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted small">No comments yet.</p>
+            {% endfor %}
+
+            <!-- Add comment form -->
+            <form method="post" action="{% url 'add_comment' case.id %}" class="mt-2">
+                {% csrf_token %}
+                {{ comment_form.body }}
+                <button type="submit" class="btn btn-primary btn-sm mt-2">
+                    <i class="bi bi-send me-1"></i>Post Comment
+                </button>
+            </form>
+        </div>
+
     </div>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="mb-0">Evidence Files</h6>
-            <a class="btn btn-sm btn-outline-primary" href="{% url 'add_evidence' case.id %}">+ Add Evidence</a>
-        </div>
-        <ul class="list-group list-group-flush">
-            {% for item in case.evidence.all %}
-                <li class="list-group-item">
-                    <a href="{{ item.file.url }}" target="_blank">{{ item.filename }}</a> - {{ item.description }}<br>
-                    <small class="text-muted">Uploaded by {{ item.uploaded_by }} on {{ item.uploaded_at|naturaltime }}</small>
-                </li>
-            {% empty %}
-                <li class="list-group-item text-muted">No evidence uploaded yet.</li>
-            {% endfor %}
-        </ul>
-    </div>
+    <!-- Right column -->
+    <div class="col-lg-4">
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <h6 class="mb-0">Activity Log</h6>
-        </div>
-        <ul class="list-group list-group-flush">
-            {% for log in case.activitylog_set.all %}
-                <li class="list-group-item">
-                    <strong>{{ log.timestamp|naturaltime }}</strong> — 
-                    {{ log.user }}: {{ log.get_action_display }}<br>
-                    <small>{{ log.details }}</small>
+        <!-- Deadlines -->
+        <div class="card p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0"><i class="bi bi-calendar-event me-1"></i>Deadlines</h6>
+                <a href="{% url 'add_deadline' case.id %}" class="btn btn-sm btn-outline-warning">
+                    <i class="bi bi-plus-lg me-1"></i>Add
+                </a>
+            </div>
+            {% if case.deadlines.all %}
+            <ul class="list-group list-group-flush">
+                {% for d in case.deadlines.all %}
+                <li class="list-group-item px-0">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="{% if d.is_completed %}text-decoration-line-through text-muted{% elif d.is_overdue %}overdue{% endif %}">
+                                {{ d.title }}
+                            </span>
+                            <div class="text-muted small">{{ d.get_deadline_type_display }} · {{ d.due_date|date:"Y-m-d H:i" }}</div>
+                        </div>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'toggle_deadline' d.id %}" class="btn btn-xs btn-sm py-0 px-1 btn-outline-{% if d.is_completed %}secondary{% else %}success{% endif %}"
+                               title="{% if d.is_completed %}Mark incomplete{% else %}Mark complete{% endif %}">
+                                <i class="bi bi-{% if d.is_completed %}arrow-counterclockwise{% else %}check-lg{% endif %}"></i>
+                            </a>
+                            <a href="{% url 'delete_deadline' d.id %}" class="btn btn-xs btn-sm py-0 px-1 btn-outline-danger"
+                               onclick="return confirm('Delete deadline?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
                 </li>
-            {% empty %}
-                <li class="list-group-item text-muted">No activity yet.</li>
-            {% endfor %}
-        </ul>
-    </div>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted small mb-0">No deadlines set.</p>
+            {% endif %}
+        </div>
 
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <h6 class="mb-0">Status History</h6>
-        </div>
-        <ul class="list-group list-group-flush">
-            {% for log in case.status_logs.all %}
-                <li class="list-group-item">
-                    <strong>{{ log.changed_at|naturaltime }}</strong>: 
-                    <span class="badge bg-warning text-dark">{{ log.previous_status }}</span> → 
-                    <span class="badge bg-success">{{ log.new_status }}</span> by {{ log.changed_by.username }}<br>
-                    <small class="text-muted">{{ log.note }}</small>
+        <!-- Status history -->
+        <div class="card p-3 mb-3">
+            <h6 class="mb-2"><i class="bi bi-clock-history me-1"></i>Status History</h6>
+            {% if case.status_logs.all %}
+            <ul class="list-group list-group-flush">
+                {% for log in case.status_logs.all %}
+                <li class="list-group-item px-0 small">
+                    <span class="badge bg-warning text-dark">{{ log.previous_status }}</span>
+                    <i class="bi bi-arrow-right mx-1"></i>
+                    <span class="badge bg-success">{{ log.new_status }}</span>
+                    <div class="text-muted">{{ log.changed_by.username }} · {{ log.changed_at|naturaltime }}</div>
                 </li>
-            {% empty %}
-                <li class="list-group-item text-muted">No status changes yet.</li>
-            {% endfor %}
-        </ul>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted small mb-0">No status changes yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Activity log -->
+        <div class="card p-3">
+            <h6 class="mb-2"><i class="bi bi-activity me-1"></i>Activity Log</h6>
+            {% if case.activitylog_set.all %}
+            <ul class="list-group list-group-flush">
+                {% for log in case.activitylog_set.all|slice:":10" %}
+                <li class="list-group-item px-0 small">
+                    <strong>{{ log.user.username }}</strong> — {{ log.get_action_display }}
+                    <div class="text-muted">{{ log.timestamp|naturaltime }}</div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted small mb-0">No activity yet.</p>
+            {% endif %}
+        </div>
+
     </div>
 </div>
 {% endblock %}

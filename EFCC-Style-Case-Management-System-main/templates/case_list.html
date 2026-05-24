@@ -1,24 +1,96 @@
 {% extends 'base.html' %}
-{% block content %}
-<h4>Cases</h4>
-<a class="btn btn-primary mb-3" href="{% url 'case_create' %}">+ New Case</a>
-<table class="table table-bordered">
-    <thead><tr><th>Title</th><th>Status</th><th>Assigned</th><th></th></tr></thead>
-    <tbody>
-        {% for case in cases %}
-        <tr>
-            <td>{{ case.title }}</td>
-            <td>{{ case.get_status_display }}</td>
-            <td>{{ case.assigned_to }}</td>
-            <td><a class="btn btn-primary btn-sm" href="{% url 'case_detail' case.pk %}">View</a></td>
-            {% if user.is_superuser or case.assigned_to == user %}
-                <td><a class="btn btn-sm btn-secondary" href="{% url 'case_update' case.pk %}">Edit</a></td>
-            {% endif %}
-        </tr>
-        {% empty %}
-        <tr><td colspan="4">No cases found.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endblock %}
+{% block title %}Cases — EFCC CMS{% endblock %}
+{% block page_title %}Cases{% endblock %}
+{% block nav_cases %}active{% endblock %}
 
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">All Cases</h5>
+    <div class="d-flex gap-2">
+        <a href="{% url 'case_create' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>New Case
+        </a>
+        <a href="{% url 'export_cases_csv' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-download me-1"></i>Export CSV
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter -->
+<div class="card p-3 mb-3">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-4">
+            {{ search_form.q.label_tag }}
+            {{ search_form.q }}
+        </div>
+        <div class="col-md-2">
+            {{ search_form.status.label_tag }}
+            {{ search_form.status }}
+        </div>
+        <div class="col-md-2">
+            {{ search_form.priority.label_tag }}
+            {{ search_form.priority }}
+        </div>
+        <div class="col-md-2">
+            {{ search_form.date_from.label_tag }}
+            {{ search_form.date_from }}
+        </div>
+        <div class="col-md-2">
+            {{ search_form.date_to.label_tag }}
+            {{ search_form.date_to }}
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-search me-1"></i>Search
+            </button>
+            <a href="{% url 'case_list' %}" class="btn btn-outline-secondary btn-sm">Clear</a>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Assigned To</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for case in cases %}
+                <tr class="priority-{{ case.priority }}">
+                    <td class="text-muted small">{{ case.pk }}</td>
+                    <td><a href="{% url 'case_detail' case.pk %}" class="text-decoration-none fw-semibold">{{ case.title }}</a></td>
+                    <td>
+                        <span class="badge bg-{% if case.status == 'open' %}warning text-dark{% elif case.status == 'investigating' %}info text-dark{% else %}success{% endif %}">
+                            {{ case.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if case.priority == 'critical' %}danger{% elif case.priority == 'high' %}warning text-dark{% elif case.priority == 'medium' %}primary{% else %}secondary{% endif %}">
+                            {{ case.get_priority_display }}
+                        </span>
+                    </td>
+                    <td>{{ case.assigned_to.username|default:"—" }}</td>
+                    <td class="text-muted small">{{ case.created_at|date:"Y-m-d" }}</td>
+                    <td>
+                        <a href="{% url 'case_detail' case.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                        {% if request.user.role == 'admin' or case.assigned_to == request.user %}
+                        <a href="{% url 'case_update' case.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-4">No cases found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

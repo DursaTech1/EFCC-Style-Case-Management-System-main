@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}{% if suspect %}Edit Suspect{% else %}Add Suspect{% endif %} — EFCC CMS{% endblock %}
+{% block page_title %}{% if suspect %}Edit Suspect{% else %}Add Suspect{% endif %}{% endblock %}
+{% block nav_cases %}active{% endblock %}
+
+{% block content %}
+<div class="card p-4" style="max-width:700px;">
+    <h5 class="mb-3">
+        <i class="bi bi-person-exclamation me-2"></i>
+        {% if suspect %}Edit Suspect{% else %}Add Suspect to "{{ case.title }}"{% endif %}
+    </h5>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Full Name *</label>
+                {{ form.full_name }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Alias / Nickname</label>
+                {{ form.alias }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Date of Birth</label>
+                {{ form.date_of_birth }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Gender</label>
+                {{ form.gender }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Nationality</label>
+                {{ form.nationality }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Phone</label>
+                {{ form.phone }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Email</label>
+                {{ form.email }}
+            </div>
+            <div class="col-12">
+                <label class="form-label">Address</label>
+                {{ form.address }}
+            </div>
+            <div class="col-12">
+                <label class="form-label">Notes</label>
+                {{ form.notes }}
+            </div>
+            <div class="col-12">
+                <label class="form-label">Photo</label>
+                {{ form.photo }}
+            </div>
+        </div>
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-save me-1"></i>{% if suspect %}Update{% else %}Add Suspect{% endif %}
+            </button>
+            <a href="{% url 'case_detail' case.pk %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
