@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Report Summary</h3>
+
+{% for status, reports in reports_by_status.items %}
+  <h5 class="mt-4">{{ status|title }} ({{ reports|length }})</h5>
+  <table class="table table-bordered table-sm">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Source</th>
+        <th>Created</th>
+        <th>Reliability</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for report in reports %}
+        <tr>
+          <td>{{ report.title }}</td>
+          <td>{{ report.source.name }}</td>
+          <td>{{ report.created_at|date:"Y-m-d" }}</td>
+          <td>{{ report.source.reliability_score }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endfor %}
+
+<a class="btn btn-outline-secondary mt-3" href="{% url 'download_report_pdf' %}">📄 Download as PDF</a>
+<a class="btn btn-outline-primary mt-3" onclick="window.print()">🖨️ Print This Page</a>
+{% endblock %}

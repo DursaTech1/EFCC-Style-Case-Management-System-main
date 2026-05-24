@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Intelligence Dashboard</h2>
+
+<div id="map" style="height: 400px;" class="mt-4 mb-4 rounded border"></div>
+
+<div class="row">
+  <div class="col-md-6">
+    <canvas id="reportTypeChart"></canvas>
+  </div>
+  <div class="col-md-6">
+    <canvas id="sourceTypeChart"></canvas>
+  </div>
+</div>
+
+<p class="mt-4"><strong>Average Source Reliability:</strong> {{ avg_reliability|floatformat:2 }}</p>
+
+<script>
+  const reportTypeChart = new Chart(document.getElementById('reportTypeChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ report_stats|pluck:'report_type'|safe }},
+      datasets: [{
+        label: 'Report Types',
+        data: {{ report_stats|pluck:'total'|safe }},
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+      }]
+    }
+  });
+
+  const sourceTypeChart = new Chart(document.getElementById('sourceTypeChart'), {
+    type: 'pie',
+    data: {
+      labels: {{ source_stats|pluck:'source_type'|safe }},
+      datasets: [{
+        data: {{ source_stats|pluck:'total'|safe }},
+        backgroundColor: ['#f39c12', '#27ae60', '#8e44ad'],
+      }]
+    }
+  });
+</script>
+<script>
+  const map = L.map('map').setView([9.0820, 8.6753], 6); // Centered on Nigeria
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  const reportLocations = {{ location_data|safe }};
+
+  reportLocations.forEach(report => {
+    if (report.latitude && report.longitude) {
+      L.marker([report.latitude, report.longitude])
+        .addTo(map)
+        .bindPopup(`<strong>${report.title}</strong>`);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+{% endblock %}

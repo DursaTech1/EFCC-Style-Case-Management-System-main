@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load form_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm rounded-3">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">{% if is_update %}Update Case{% else %}New Case{% endif %}</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="id_title" class="form-label">Title</label>
+                    {{ form.title|add_class:"form-control" }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_description" class="form-label">Description</label>
+                    {{ form.description|add_class:"form-control" }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_status" class="form-label">Status</label>
+                    {{ form.status|add_class:"form-select" }}
+                </div>
+
+                {% if request.user.role == 'admin' %}
+                <div class="mb-3">
+                    <label for="id_assigned_to" class="form-label">Assign to</label>
+                    {{ form.assigned_to|add_class:"form-select" }}
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-success w-100">
+                    {% if is_update %}Update{% else %}Submit{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

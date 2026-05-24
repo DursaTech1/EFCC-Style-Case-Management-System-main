@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Intelligence Reports</h2>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-4">
+    <input type="text" name="q" placeholder="Search title or summary..." value="{{ query }}" class="form-control" />
+  </div>
+  <div class="col-md-3">
+    <select name="report_type" class="form-select">
+      <option value="">-- Report Type --</option>
+      <option value="Incident" {% if report_type == "Incident" %}selected{% endif %}>Incident</option>
+      <option value="Threat" {% if report_type == "Threat" %}selected{% endif %}>Threat</option>
+      <option value="Surveillance" {% if report_type == "Surveillance" %}selected{% endif %}>Surveillance</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <input type="number" name="min_reliability" placeholder="Min Reliability" value="{{ min_reliability }}" class="form-control" min="0" max="10" />
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-primary w-100">Filter</button>
+  </div>
+</form>
+
+<a class="btn btn-sm btn-primary mb-3" href="{% url 'report_create' %}">+ Add Report</a>
+
+<ul class="list-group">
+  {% for report in reports %}
+    <li class="list-group-item">
+      <strong>{{ report.title }}</strong> ({{ report.get_report_type_display }}) - Source: {{ report.source }}<br>
+      Reliability: {{ report.reliability_score }} | Added by {{ report.added_by }}
+      Tags: {{ report.tags }} | By {{ report.created_by }} on {{ report.created_at|date:"Y-m-d H:i" }}
+    </li>
+  {% empty %}
+    <li class="list-group-item">No reports found.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
+

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Intelligence Report Summary</title>
+    <style>
+        body { font-family: 'DejaVu Sans', sans-serif; }
+        h3, h5 { margin-top: 1em; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    </style>
+</head>
+<body>
+    <h3>Intelligence Report Summary</h3>
+
+    {% for status, reports in reports_by_status.items %}
+        <h5>{{ status|title }} ({{ reports|length }})</h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Source</th>
+                    <th>Created</th>
+                    <th>Reliability</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                    <tr>
+                        <td>{{ report.title }}</td>
+                        <td>{{ report.source.name }}</td>
+                        <td>{{ report.created_at|date:"Y-m-d" }}</td>
+                        <td>{{ report.source.reliability_score }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+</body>
+</html>
