@@ -186,8 +186,7 @@ When registering, users can select one of the following roles:
 
 ## Screenshots
 
-> Add screenshots here after deployment.
-
+> 
 ---
 
 ## License
