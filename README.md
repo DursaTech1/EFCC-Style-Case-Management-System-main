@@ -185,13 +185,41 @@ When registering, users can select one of the following roles:
 ---
 
 ## Screenshots
-<img width="1914" height="1079" alt="image" src="https://github.com/user-attachments/assets/5350bf5f-4830-4a38-8891-79c3c9c113c1" />
-
-<img width="1916" height="1076" alt="image" src="https://github.com/user-attachments/assets/df9c5eb5-0a53-4871-8227-ce7d3d61136b" />
+<img width="1918" height="1079" alt="image" src="https://github.com/user-attachments/assets/36ee4131-89a1-4e48-a876-5402a7e8c6d5" />
 
 
+<img width="1888" height="1075" alt="image" src="https://github.com/user-attachments/assets/b8f6ffd5-6b5c-4136-97b5-da5b890c1fa4" />
 
 
+<img width="1898" height="1064" alt="image" src="https://github.com/user-attachments/assets/77d1b2ae-86a9-49b3-a587-be36e6ba4e30" />
+
+<img width="1898" height="1079" alt="image" src="https://github.com/user-attachments/assets/91f8d310-3a2d-4f7b-8e63-27e672ba17c2" />
+
+<img width="1911" height="1077" alt="image" src="https://github.com/user-attachments/assets/1b3d28cf-df7c-4c42-a1ed-8c059fe749a3" />
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/df4d4c33-7e1e-4d16-a5b9-12e1007f6016" />
+
+<img width="1907" height="1079" alt="image" src="https://github.com/user-attachments/assets/accf55ee-1db1-48c1-ae93-d34c26608cad" />
+
+<img width="1871" height="1079" alt="image" src="https://github.com/user-attachments/assets/329f4cbf-6d6d-4c82-a688-db0160bc2ddc" />
+
+<img width="1900" height="1079" alt="image" src="https://github.com/user-attachments/assets/861a703b-9786-43cf-b304-39d86d111da7" />
+
+<img width="1877" height="1079" alt="image" src="https://github.com/user-attachments/assets/1fc90486-6ae4-41d2-a351-11bf7ac0b6c8" />
+
+<img width="1910" height="1077" alt="image" src="https://github.com/user-attachments/assets/2cab535c-993f-4c7c-beb2-0ed1f12ee778" />
+
+<img width="1912" height="1077" alt="image" src="https://github.com/user-attachments/assets/c2dfdfb8-c644-49d8-8e8f-243376d5a7e7" />
+
+<img width="1892" height="1079" alt="image" src="https://github.com/user-attachments/assets/c5275b08-8174-4462-b657-63202587980b" />
+
+<img width="1914" height="1079" alt="image" src="https://github.com/user-attachments/assets/6bf1081e-6b61-4235-82b5-a09ff87d9237" />
+
+<img width="1917" height="1079" alt="image" src="https://github.com/user-attachments/assets/d563b479-100c-433e-b29d-826cefc9bf2d" />
+
+<img width="1901" height="1079" alt="image" src="https://github.com/user-attachments/assets/ec2860f2-72ba-4a3b-935a-ba448a49befe" />
+
+<img width="1891" height="1012" alt="image" src="https://github.com/user-attachments/assets/25104477-25f0-4c09-b84c-5da2755d1b29" />
 
 
 > 
