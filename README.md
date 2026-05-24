@@ -28,7 +28,7 @@ A Django-based case management platform inspired by the EFCC (Economic and Finan
 ### User Roles
 | Role | Access |
 |------|--------|
-| **Admin** | Full access — all cases, all users, assign cases |
+| **Admin** | Full access all cases, all users, assign cases |
 | **Investigator** | View and edit assigned cases, upload evidence |
 | **Legal Officer** | View assigned cases |
 | **Analyst** | View assigned cases, create intel reports |
